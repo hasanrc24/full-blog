@@ -1,1 +1,1 @@
-# full-blog
+# Advanced Blog
