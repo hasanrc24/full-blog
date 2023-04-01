@@ -12,6 +12,10 @@ const router = express.Router();
 
 router.route("/").get(allBlogs).post(authMiddleware, newBlog);
 router.route("/search").get(searchBlog);
-router.route("/:id").get(getBlog).put(editBlog).delete(deleteBlog);
+router
+  .route("/:id")
+  .get(getBlog)
+  .put(authMiddleware, editBlog)
+  .delete(authMiddleware, deleteBlog);
 
 module.exports = router;

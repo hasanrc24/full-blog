@@ -2,7 +2,12 @@ const Blog = require("../models/blogModel");
 
 const allBlogs = async (req, res) => {
   try {
-    let blog = await Blog.find().populate("author", "_id name email");
+    let blog = await Blog.find()
+      .populate("author", "_id name email")
+      .populate({
+        path: "comments",
+        populate: { path: "author", select: "_id name email" },
+      });
     res.json(blog);
   } catch (error) {
     res.status(400);
@@ -33,14 +38,24 @@ const searchBlog = async (req, res) => {
       }
     : {};
 
-  const users = await Blog.find(keyword).populate("author", "_id name email");
+  const users = await Blog.find(keyword)
+    .populate("author", "_id name email")
+    .populate({
+      path: "comments",
+      populate: { path: "author", select: "_id name email" },
+    });
   res.send(users);
 };
 
 const getBlog = async (req, res) => {
   const id = req.params.id;
   try {
-    const blog = await Blog.findById(id).populate("author", "_id name email");
+    const blog = await Blog.findById(id)
+      .populate("author", "_id name email")
+      .populate({
+        path: "comments",
+        populate: { path: "author", select: "_id name email" },
+      });
     if (!blog) {
       res.status(404).json({ message: "Blog not found" });
       return;
