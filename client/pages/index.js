@@ -2,10 +2,20 @@ import Head from "next/head";
 import { Inter } from "next/font/google";
 import Navbar from "@/components/Navbar";
 import HeroCard from "@/components/HeroCard";
+import { useEffect, useState } from "react";
+import Cookies from "js-cookie";
+import { useRouter } from "next/router";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export default function Home() {
+  const [user, setUser] = useState();
+
+  useEffect(() => {
+    const localUserInfo = JSON.parse(localStorage.getItem("blogUser"));
+    setUser(localUserInfo);
+  }, []);
+
   return (
     <>
       <Head>
@@ -15,7 +25,7 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className="">
-        <Navbar />
+        <Navbar user={user} />
         <div className="flex flex-col md:flex-row gap-8 justify-center my-6">
           <HeroCard />
           <HeroCard />
@@ -23,4 +33,17 @@ export default function Home() {
       </main>
     </>
   );
+}
+
+export async function getServerSideProps({ req }) {
+  if (!req.headers.cookie) {
+    return {
+      redirect: {
+        destination: "/signIn",
+      },
+    };
+  }
+  return {
+    props: {},
+  };
 }
