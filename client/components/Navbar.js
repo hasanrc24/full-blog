@@ -8,9 +8,9 @@ import { BsSearch } from "react-icons/bs";
 import { useDispatch } from "react-redux";
 
 const Navbar = ({ user }) => {
-  console.log(user);
   const dispatch = useDispatch();
   const router = useRouter();
+  // console.log(user);
 
   const handleLogout = () => {
     localStorage.removeItem("blogUser");
@@ -41,7 +41,6 @@ const Navbar = ({ user }) => {
         <Link href="/contact" className="">
           Contact
         </Link>
-        {/* {!user?._id && } */}
         {user?._id ? (
           <div className="avatar placeholder dropdown dropdown-end">
             <label

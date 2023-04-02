@@ -5,15 +5,21 @@ import HeroCard from "@/components/HeroCard";
 import { useEffect, useState } from "react";
 import Cookies from "js-cookie";
 import { useRouter } from "next/router";
+import { useDispatch } from "react-redux";
+import { addUserInfo } from "@/redux/userSlice";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export default function Home() {
   const [user, setUser] = useState();
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const localUserInfo = JSON.parse(localStorage.getItem("blogUser"));
-    setUser(localUserInfo);
+    if (localUserInfo) {
+      dispatch(addUserInfo(localUserInfo));
+      setUser(localUserInfo);
+    }
   }, []);
 
   return (

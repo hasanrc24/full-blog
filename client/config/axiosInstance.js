@@ -14,7 +14,8 @@ export const userRegister = async (username, email, password, image = null) => {
     email: email,
     password: password,
   };
-  if (image) {
+  // console.log(image, "image");
+  if (image !== null) {
     postData.image = image;
   }
   return await api.post("/user/register", postData);
