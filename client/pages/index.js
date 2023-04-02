@@ -7,10 +7,14 @@ import Cookies from "js-cookie";
 import { useRouter } from "next/router";
 import { useDispatch } from "react-redux";
 import { addUserInfo } from "@/redux/userSlice";
+import { getAllBlogs } from "@/config/axiosInstance";
+import { addBlogs } from "@/redux/blogSlice";
+import { wrapper } from "@/redux/store";
+import BlogCard from "@/components/BlogCard";
 
 const inter = Inter({ subsets: ["latin"] });
 
-export default function Home() {
+export default function Home({ blogs }) {
   const [user, setUser] = useState();
   const dispatch = useDispatch();
 
@@ -19,8 +23,13 @@ export default function Home() {
     if (localUserInfo) {
       dispatch(addUserInfo(localUserInfo));
       setUser(localUserInfo);
+      dispatch(addBlogs(blogs));
     }
   }, []);
+
+  const handleClick = (title) => {
+    console.log(title);
+  };
 
   return (
     <>
@@ -32,24 +41,37 @@ export default function Home() {
       </Head>
       <main className="">
         <Navbar user={user} />
-        <div className="flex flex-col md:flex-row gap-8 justify-center my-6">
-          <HeroCard />
-          <HeroCard />
+        <div className="flex flex-col md:flex-row gap-8 justify-center my-6 pb-6 border-b">
+          {blogs?.slice(0, 2).map((blog) => {
+            return (
+              <HeroCard
+                key={blog._id}
+                blog={blog}
+                onClick={() => handleClick(blog.title)}
+              />
+            );
+          })}
+        </div>
+        <div className="mb-6">
+          {blogs?.slice(2).map((blog) => {
+            return <BlogCard key={blog._id} blog={blog} />;
+          })}
         </div>
       </main>
     </>
   );
 }
 
-export async function getServerSideProps({ req }) {
-  if (!req.headers.cookie) {
-    return {
-      redirect: {
-        destination: "/signIn",
-      },
-    };
-  }
+export const getServerSideProps = async ({ req }) => {
+  // if (!req.headers.cookie) {
+  //   return {
+  //     redirect: {
+  //       destination: "/signIn",
+  //     },
+  //   };
+  // }
+  const { data } = await getAllBlogs();
   return {
-    props: {},
+    props: { blogs: data },
   };
-}
+};
