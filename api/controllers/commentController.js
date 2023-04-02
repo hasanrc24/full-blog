@@ -24,7 +24,7 @@ const addComment = async (req, res) => {
 const getComments = async (req, res) => {
   try {
     const comments = await Comment.find({ blog: req.params.blogId })
-      .populate("author", "name email")
+      .populate("author", "_id name email image")
       .populate("blog", "_id title body author");
     res.json(comments);
   } catch (error) {

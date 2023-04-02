@@ -3,10 +3,10 @@ const Blog = require("../models/blogModel");
 const allBlogs = async (req, res) => {
   try {
     let blog = await Blog.find()
-      .populate("author", "_id name email")
+      .populate("author", "_id name email image")
       .populate({
         path: "comments",
-        populate: { path: "author", select: "_id name email" },
+        populate: { path: "author", select: "_id name email image" },
       });
     res.json(blog);
   } catch (error) {
@@ -19,8 +19,9 @@ const newBlog = async (req, res) => {
     title: req.body.title,
     body: req.body.body,
     author: req.user._id,
+    image: req.body.image ? req.body.image : null,
   });
-  blog = await blog.populate("author", "_id name email");
+  blog = await blog.populate("author", "_id name email image");
   if (blog) {
     res.status(201).json(blog);
   } else {
@@ -39,7 +40,7 @@ const searchBlog = async (req, res) => {
     : {};
 
   const users = await Blog.find(keyword)
-    .populate("author", "_id name email")
+    .populate("author", "_id name email image")
     .populate({
       path: "comments",
       populate: { path: "author", select: "_id name email" },
@@ -51,7 +52,7 @@ const getBlog = async (req, res) => {
   const id = req.params.id;
   try {
     const blog = await Blog.findById(id)
-      .populate("author", "_id name email")
+      .populate("author", "_id name email image")
       .populate({
         path: "comments",
         populate: { path: "author", select: "_id name email" },

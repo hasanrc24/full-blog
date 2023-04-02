@@ -1,6 +1,7 @@
 import Head from "next/head";
 import { Inter } from "next/font/google";
-import styles from "@/styles/Home.module.css";
+import Navbar from "@/components/Navbar";
+import HeroCard from "@/components/HeroCard";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -13,8 +14,12 @@ export default function Home() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className={styles.main}>
-        <div>Hello there</div>
+      <main className="">
+        <Navbar />
+        <div className="flex flex-col md:flex-row gap-8 justify-center my-6">
+          <HeroCard />
+          <HeroCard />
+        </div>
       </main>
     </>
   );

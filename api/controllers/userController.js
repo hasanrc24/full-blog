@@ -3,7 +3,7 @@ const User = require("../models/userModel");
 const generateToken = require("../config/token");
 
 const userRegister = async (req, res) => {
-  const { name, email, password } = req.body;
+  const { name, email, password, image } = req.body;
 
   if (!name || !email || !password) {
     res.status(400).send("Please fill all required fields");
@@ -17,13 +17,14 @@ const userRegister = async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = new User({ name, email, password: hashedPassword });
+    const newUser = new User({ name, email, image, password: hashedPassword });
     await newUser.save();
 
     res.status(201).json({
       _id: newUser._id,
       name: newUser.name,
       email: newUser.email,
+      image: newUser.image,
       token: generateToken(newUser._id),
     });
   } catch (err) {
@@ -52,6 +53,7 @@ const userLogin = async (req, res) => {
       _id: user._id,
       name: user.name,
       email: user.email,
+      image: user.image,
       token: generateToken(user._id),
     });
   } catch (err) {
