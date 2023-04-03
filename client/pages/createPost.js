@@ -1,25 +1,37 @@
 import Navbar from "@/components/Navbar";
-import React, { useState } from "react";
-import ReactQuill from "react-quill";
-import "react-quill/dist/quill.snow.css";
+import dynamic from "next/dynamic";
+import React, { useCallback, useRef, useState } from "react";
+import { EditorState, convertToRaw } from "draft-js";
+import draftToHtml from "draftjs-to-html";
 
 const CreatePost = () => {
-  const [postBody, setpostBody] = useState("");
+  const [postBody, setpostBody] = useState();
+
+  const RichEditor = dynamic(() => import("../components/RichEditor"), {
+    ssr: false,
+  });
+
+  const [editorState, setEditorState] = useState(() =>
+    EditorState.createEmpty()
+  );
+  console.log(draftToHtml(convertToRaw(editorState.getCurrentContent())));
   return (
     <div>
       <Navbar />
-      <div
-        style={{ height: "calc(100vh - 72px)" }}
-        className="mx-auto text-center"
-      >
+      <div className="mx-auto text-center">
         <p className="font-semibold text-4xl mt-4 mb-8">Post a blog</p>
         <form className="h-full">
           <input
             type="text"
             placeholder="Blog Title"
-            className="px-4 py-2 w-1/4 rounded-md focus:rounded-none border-b-2 outline-none focus:border-slate-700"
+            className="px-4 py-2 mb-8 w-1/4 rounded-md focus:rounded-none border-b-2 outline-none focus:border-slate-700"
           />
-          <ReactQuill theme="snow" value={postBody} onChange={setpostBody} />
+          <RichEditor
+            // postBody={postBody}
+            // setpostBody={setpostBody}
+            editorState={editorState}
+            setEditorState={setEditorState}
+          />
         </form>
       </div>
     </div>
