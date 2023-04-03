@@ -15,16 +15,16 @@ import BlogCard from "@/components/BlogCard";
 const inter = Inter({ subsets: ["latin"] });
 
 export default function Home({ blogs }) {
-  const [user, setUser] = useState();
+  // const [user, setUser] = useState();
   const dispatch = useDispatch();
 
   useEffect(() => {
-    const localUserInfo = JSON.parse(localStorage.getItem("blogUser"));
-    if (localUserInfo) {
-      dispatch(addUserInfo(localUserInfo));
-      setUser(localUserInfo);
-      dispatch(addBlogs(blogs));
-    }
+    // const localUserInfo = JSON.parse(localStorage.getItem("blogUser"));
+    // if (localUserInfo) {
+    //   dispatch(addUserInfo(localUserInfo));
+    //   setUser(localUserInfo);
+    dispatch(addBlogs(blogs));
+    // }
   }, []);
 
   const handleClick = (title) => {
@@ -40,7 +40,7 @@ export default function Home({ blogs }) {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className="">
-        <Navbar user={user} />
+        <Navbar />
         <div className="flex flex-col md:flex-row gap-8 justify-center my-6 pb-6 border-b">
           {blogs?.slice(0, 2).map((blog) => {
             return (
@@ -52,7 +52,7 @@ export default function Home({ blogs }) {
             );
           })}
         </div>
-        <div className="mb-6">
+        <div className="mb-6 flex gap-4">
           {blogs?.slice(2).map((blog) => {
             return <BlogCard key={blog._id} blog={blog} />;
           })}

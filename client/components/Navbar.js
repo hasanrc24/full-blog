@@ -3,14 +3,23 @@ import Cookies from "js-cookie";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { BsSearch } from "react-icons/bs";
 import { useDispatch } from "react-redux";
 
-const Navbar = ({ user }) => {
+const Navbar = () => {
   const dispatch = useDispatch();
   const router = useRouter();
+  const [user, setUser] = useState({});
   // console.log(user);
+
+  useEffect(() => {
+    const localUserInfo = JSON.parse(localStorage.getItem("blogUser"));
+    if (localUserInfo) {
+      dispatch(addUserInfo(localUserInfo));
+      setUser(localUserInfo);
+    }
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem("blogUser");
@@ -59,7 +68,7 @@ const Navbar = ({ user }) => {
               className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52"
             >
               <li>
-                <a>Post a Blog</a>
+                <Link href="/createPost">Post a Blog</Link>
               </li>
               <li onClick={handleLogout}>
                 <a>Logout</a>
