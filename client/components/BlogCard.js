@@ -1,10 +1,14 @@
 import Link from "next/link";
-import React from "react";
+import React, { useState } from "react";
 import { FaRegComment } from "react-icons/fa";
 
 const BlogCard = ({ blog }) => {
+  const [blogId, setBlogId] = useState("");
   return (
-    <Link href="/" className="card w-72 bg-base-100 shadow-xl rounded-lg">
+    <Link
+      href={`/post/${blog._id}`}
+      className="card h-max overflow-hidden bg-base-100 shadow-xl rounded-lg"
+    >
       {blog?.image && (
         <figure>
           <img src={blog.image} alt="blog-img" />
@@ -12,7 +16,7 @@ const BlogCard = ({ blog }) => {
       )}
       <div className="card-body p-3">
         <h2 className="font-semibold">{blog.title}</h2>
-        <p>
+        <p className="">
           {blog.body.slice(0, 72)}
           {"..."}
         </p>

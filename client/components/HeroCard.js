@@ -1,11 +1,10 @@
 import Link from "next/link";
 import React from "react";
 
-const HeroCard = ({ blog, onClick }) => {
+const HeroCard = ({ blog }) => {
   return (
     <Link
-      href="/"
-      onClick={onClick}
+      href={`/post/${blog._id}`}
       className="card overflow-hidden w-96 shadow-xl"
     >
       {blog?.image && (
