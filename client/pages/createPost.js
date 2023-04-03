@@ -24,7 +24,7 @@ const CreatePost = () => {
           <input
             type="text"
             placeholder="Blog Title"
-            className="px-4 py-2 mb-8 w-1/4 rounded-md focus:rounded-none border-b-2 outline-none focus:border-slate-700"
+            className="px-4 py-2 mb-8 w-2/4 rounded-md focus:rounded-none border-b-2 outline-none focus:border-slate-700"
           />
           <RichEditor
             // postBody={postBody}
@@ -32,6 +32,12 @@ const CreatePost = () => {
             editorState={editorState}
             setEditorState={setEditorState}
           />
+          <input
+            type="file"
+            className="file-input file-input-bordered w-full max-w-xs my-4 rounded-md"
+          />
+          <br />
+          <button className="btn rounded-md">Post blog</button>
         </form>
       </div>
     </div>
