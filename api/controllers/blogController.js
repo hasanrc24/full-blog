@@ -52,7 +52,7 @@ const getBlog = async (req, res) => {
   const id = req.params.id;
   try {
     const blog = await Blog.findById(id)
-      .populate("author", "_id name email image")
+      .populate("author", "_id name email image role")
       .populate({
         path: "comments",
         populate: { path: "author", select: "_id name email" },

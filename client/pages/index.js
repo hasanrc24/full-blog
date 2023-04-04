@@ -52,7 +52,7 @@ export default function Home({ blogs }) {
             );
           })}
         </div>
-        <div className="mb-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="mb-6 grid grid-cols-2 md:grid-cols-4 gap-4 grid-auto-rows-min">
           {blogs?.slice(2).map((blog) => {
             return <BlogCard key={blog._id} blog={blog} />;
           })}

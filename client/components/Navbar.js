@@ -17,6 +17,7 @@ const Navbar = () => {
     const localUserInfo = JSON.parse(localStorage.getItem("blogUser"));
     if (localUserInfo) {
       dispatch(addUserInfo(localUserInfo));
+      Cookies.set("token", localUserInfo.token);
       setUser(localUserInfo);
     }
   }, []);

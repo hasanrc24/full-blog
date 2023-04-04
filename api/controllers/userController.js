@@ -25,6 +25,7 @@ const userRegister = async (req, res) => {
       name: newUser.name,
       email: newUser.email,
       image: newUser.image,
+      role: newUser.role,
       token: generateToken(newUser._id),
     });
   } catch (err) {
@@ -54,6 +55,7 @@ const userLogin = async (req, res) => {
       name: user.name,
       email: user.email,
       image: user.image,
+      role: user.role,
       token: generateToken(user._id),
     });
   } catch (err) {
