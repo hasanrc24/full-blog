@@ -2,13 +2,8 @@ const Blog = require("../models/blogModel");
 
 const allBlogs = async (req, res) => {
   try {
-    // Get the page number from the query string, default to page 1
     const page = parseInt(req.query.page) || 1;
-
-    // Set the number of results per page
     const perPage = 4;
-
-    // Calculate the number of results to skip based on the current page
     const skip = (page - 1) * perPage;
 
     let blogs = await Blog.find()
@@ -19,15 +14,12 @@ const allBlogs = async (req, res) => {
       })
       .skip(skip)
       .limit(perPage);
-
-    // Count the total number of blogs
     const count = await Blog.countDocuments();
-
-    // Calculate the total number of pages
     const totalPages = Math.ceil(count / perPage);
 
     res.json({
       blogs,
+      featured: [blogs[0], blogs[1]],
       totalPages,
       currentPage: page,
       perPage,

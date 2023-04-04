@@ -41,7 +41,7 @@ export default function Home({ blogs }) {
       <main className="mb-8">
         <Navbar />
         <div className="flex flex-col md:flex-row gap-8 justify-center my-6 pb-6 border-b">
-          {blogs?.blogs.slice(0, 2).map((blog) => {
+          {blogs?.featured?.map((blog) => {
             return <HeroCard key={blog._id} blog={blog} />;
           })}
         </div>

@@ -1,11 +1,5 @@
 import axios from "axios";
 import Cookies from "js-cookie";
-// let token;
-// if (typeof localStorage !== "undefined") {
-//   // Code that uses localStorage
-//   const data = JSON.parse(localStorage.getItem("blogUser"));
-//   token = data.token;
-// }
 const token = Cookies.get("token");
 
 export const api = axios.create({
@@ -56,4 +50,8 @@ export const getSingleBlog = async (id) => {
 
 export const editABlog = async (id, title, body) => {
   return await protectedApi.put(`/blogs/${id}`, { title, body });
+};
+
+export const deleteBlog = async (id) => {
+  return await protectedApi.delete(`/blogs/${id}`);
 };
