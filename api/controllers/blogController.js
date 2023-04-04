@@ -2,15 +2,39 @@ const Blog = require("../models/blogModel");
 
 const allBlogs = async (req, res) => {
   try {
-    let blog = await Blog.find()
+    // Get the page number from the query string, default to page 1
+    const page = parseInt(req.query.page) || 1;
+
+    // Set the number of results per page
+    const perPage = 4;
+
+    // Calculate the number of results to skip based on the current page
+    const skip = (page - 1) * perPage;
+
+    let blogs = await Blog.find()
       .populate("author", "_id name email image")
       .populate({
         path: "comments",
         populate: { path: "author", select: "_id name email image" },
-      });
-    res.json(blog);
+      })
+      .skip(skip)
+      .limit(perPage);
+
+    // Count the total number of blogs
+    const count = await Blog.countDocuments();
+
+    // Calculate the total number of pages
+    const totalPages = Math.ceil(count / perPage);
+
+    res.json({
+      blogs,
+      totalPages,
+      currentPage: page,
+      perPage,
+      totalResults: count,
+    });
   } catch (error) {
-    res.status(400);
+    res.status(400).json({ message: error.message });
   }
 };
 

@@ -1,15 +1,22 @@
 import Navbar from "@/components/Navbar";
 import dynamic from "next/dynamic";
-import React, { useState } from "react";
-import { EditorState, convertToRaw } from "draft-js";
+import React, { useEffect, useState } from "react";
+import { ContentState, EditorState, convertToRaw } from "draft-js";
 import draftToMarkdown from "draftjs-to-markdown";
-import { postBlog } from "@/config/axiosInstance";
+import { editABlog, postBlog } from "@/config/axiosInstance";
 import Head from "next/head";
+import { useDispatch, useSelector } from "react-redux";
+import { editBlog, editBlogSelector } from "@/redux/editBlogSlice";
+import { Router, useRouter } from "next/router";
 
 const CreatePost = () => {
+  const { blog } = useSelector(editBlogSelector);
+
+  const dispatch = useDispatch();
+  const router = useRouter();
+
   const [loading, setLoading] = useState(false);
-  // const [postBody, setpostBody] = useState();
-  const [title, setTitle] = useState("");
+  const [title, setTitle] = useState(blog?.title ? blog.title : "");
   const [file, setFile] = useState(null);
 
   const RichEditor = dynamic(() => import("../components/RichEditor"), {
@@ -19,43 +26,74 @@ const CreatePost = () => {
   const [editorState, setEditorState] = useState(() =>
     EditorState.createEmpty()
   );
+
+  useEffect(() => {
+    if (blog?.body) {
+      const previousEditorState = EditorState.createWithContent(
+        ContentState.createFromText(blog.body)
+      );
+      setEditorState(previousEditorState);
+    }
+
+    const handleRouteChange = () => {
+      dispatch(editBlog({}));
+    };
+    router.events.on("routeChangeComplete", handleRouteChange);
+
+    return () => {
+      router.events.off("routeChangeComplete", handleRouteChange);
+    };
+  }, []);
+
   const body = draftToMarkdown(convertToRaw(editorState.getCurrentContent()));
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
-    let image;
-    if (file) {
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("upload_preset", "advanced-blog");
-      formData.append("cloud_name", "dnqvwwxzv");
+    if (Object.keys(blog).length === 0) {
+      let image;
+      if (file) {
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("upload_preset", "advanced-blog");
+        formData.append("cloud_name", "dnqvwwxzv");
+        try {
+          console.log("pic uploading");
+          const res = await fetch(
+            "https://api.cloudinary.com/v1_1/dnqvwwxzv/image/upload",
+            {
+              method: "POST",
+              body: formData,
+            }
+          );
+          const picData = await res.json();
+          image = picData?.url?.toString();
+          // setPicture(picData?.url?.toString());
+        } catch (error) {
+          console.log(error);
+        }
+      }
       try {
-        console.log("pic uploading");
-        const res = await fetch(
-          "https://api.cloudinary.com/v1_1/dnqvwwxzv/image/upload",
-          {
-            method: "POST",
-            body: formData,
-          }
-        );
-        const picData = await res.json();
-        image = picData?.url?.toString();
-        // setPicture(picData?.url?.toString());
+        const { data } = await postBlog(title, body, image);
+        setLoading(false);
+        setTitle("");
+        setEditorState(() => EditorState.createEmpty());
+        console.log(data);
       } catch (error) {
+        setLoading(false);
         console.log(error);
       }
-    }
-    try {
-      const { data } = await postBlog(title, body, image);
-      setLoading(false);
-      setTitle("");
-      setEditorState(() => EditorState.createEmpty());
-      console.log(data);
-    } catch (error) {
-      setLoading(false);
-      console.log(error);
+    } else {
+      try {
+        const { data } = await editABlog(blog._id, title, body);
+        dispatch(editBlog({}));
+        router.replace("/");
+        setLoading(false);
+      } catch (error) {
+        console.log(error);
+        setLoading(false);
+      }
     }
   };
   return (
@@ -68,7 +106,9 @@ const CreatePost = () => {
       </Head>
       <Navbar />
       <div className="mx-auto text-center mb-6">
-        <p className="font-semibold text-4xl mt-4 mb-8">Post a blog</p>
+        <p className="font-semibold text-4xl mt-4 mb-8">
+          {blog?.body ? "Edit Blog" : "Post a Blog"}
+        </p>
         <form onSubmit={handleSubmit} className="h-full">
           <input
             type="text"
@@ -81,20 +121,32 @@ const CreatePost = () => {
             editorState={editorState}
             setEditorState={setEditorState}
           />
-          <input
-            type="file"
-            onChange={(e) => setFile(e.target.files[0])}
-            className="file-input file-input-bordered w-full max-w-xs my-4 rounded-md"
-          />
+          {Object.keys(blog).length === 0 && (
+            <input
+              type="file"
+              onChange={(e) => setFile(e.target.files[0])}
+              className="file-input file-input-bordered w-full max-w-xs my-4 rounded-md"
+            />
+          )}
           <br />
-          <button
-            type="submit"
-            className={`btn ${
-              loading && "loading btn-disabled"
-            } text-white rounded-md`}
-          >
-            Post blog
-          </button>
+          {blog?.body ? (
+            <button
+              className={`btn ${
+                loading && "loading btn-disabled"
+              } text-white rounded-md`}
+            >
+              Save Edit
+            </button>
+          ) : (
+            <button
+              type="submit"
+              className={`btn ${
+                loading && "loading btn-disabled"
+              } text-white rounded-md`}
+            >
+              Post blog
+            </button>
+          )}
         </form>
       </div>
     </div>

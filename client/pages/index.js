@@ -17,6 +17,9 @@ const inter = Inter({ subsets: ["latin"] });
 export default function Home({ blogs }) {
   // const [user, setUser] = useState();
   const dispatch = useDispatch();
+  const router = useRouter();
+
+  const { totalPages, currentPage } = blogs;
 
   useEffect(() => {
     // const localUserInfo = JSON.parse(localStorage.getItem("blogUser"));
@@ -27,10 +30,6 @@ export default function Home({ blogs }) {
     // }
   }, []);
 
-  const handleClick = (title) => {
-    console.log(title);
-  };
-
   return (
     <>
       <Head>
@@ -39,38 +38,43 @@ export default function Home({ blogs }) {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className="">
+      <main className="mb-8">
         <Navbar />
         <div className="flex flex-col md:flex-row gap-8 justify-center my-6 pb-6 border-b">
-          {blogs?.slice(0, 2).map((blog) => {
-            return (
-              <HeroCard
-                key={blog._id}
-                blog={blog}
-                onClick={() => handleClick(blog.title)}
-              />
-            );
+          {blogs?.blogs.slice(0, 2).map((blog) => {
+            return <HeroCard key={blog._id} blog={blog} />;
           })}
         </div>
         <div className="mb-6 grid grid-cols-2 md:grid-cols-4 gap-4 grid-auto-rows-min">
-          {blogs?.slice(2).map((blog) => {
+          {blogs?.blogs.map((blog) => {
             return <BlogCard key={blog._id} blog={blog} />;
           })}
+        </div>
+        <div className="btn-group flex justify-center">
+          <button
+            onClick={() => router.push(`?page=${currentPage - 1}`)}
+            className={`btn btn-outline ${currentPage <= 1 && "btn-disabled"}`}
+          >
+            Previous
+          </button>
+          <button
+            onClick={() => router.push(`?page=${currentPage + 1}`)}
+            className={`btn btn-outline ${
+              totalPages <= currentPage && "btn-disabled"
+            }`}
+          >
+            Next
+          </button>
         </div>
       </main>
     </>
   );
 }
 
-export const getServerSideProps = async ({ req }) => {
-  // if (!req.headers.cookie) {
-  //   return {
-  //     redirect: {
-  //       destination: "/signIn",
-  //     },
-  //   };
-  // }
-  const { data } = await getAllBlogs();
+export const getServerSideProps = async ({ req, query }) => {
+  const page = Number(query.page) || 1;
+
+  const { data } = await getAllBlogs(page);
   return {
     props: { blogs: data },
   };

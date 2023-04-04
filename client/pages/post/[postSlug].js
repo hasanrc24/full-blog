@@ -1,15 +1,26 @@
 import Navbar from "@/components/Navbar";
 import { getSingleBlog } from "@/config/axiosInstance";
-import { getTime } from "@/config/utils";
+import { getTime, serializeMarkdown } from "@/config/utils";
+import { editBlog } from "@/redux/editBlogSlice";
 import { userSelector } from "@/redux/userSlice";
+import { MDXRemote, MDXRemoteSerializeResult } from "next-mdx-remote";
 import Head from "next/head";
+import { useRouter } from "next/router";
 import React from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
-const PostSlug = ({ post }) => {
-  const { title, image, author, createdAt, body } = post;
+const PostSlug = ({ post, postBody }) => {
+  const dispatch = useDispatch();
+  const router = useRouter();
+
+  const { title, image, author, createdAt } = post;
 
   const { user } = useSelector(userSelector);
+
+  const handleEditBlog = () => {
+    dispatch(editBlog(post));
+    router.replace(`/createPost`);
+  };
   return (
     <>
       <Head>
@@ -38,7 +49,10 @@ const PostSlug = ({ post }) => {
                 </div>
               </div>
               {(user.role === "admin" || author._id === user._id) && (
-                <button className="btn max-w-max rounded-md text-white">
+                <button
+                  onClick={handleEditBlog}
+                  className="btn max-w-max rounded-md text-white"
+                >
                   Edit
                 </button>
               )}
@@ -48,7 +62,9 @@ const PostSlug = ({ post }) => {
             {image && <img src={image} alt="post image" className="" />}
           </div>
         </div>
-        <div>{body}</div>
+        <div>
+          <MDXRemote {...postBody} />
+        </div>
       </div>
     </>
   );
@@ -59,6 +75,6 @@ export default PostSlug;
 export const getServerSideProps = async ({ req, query }) => {
   const { data } = await getSingleBlog(query.postSlug);
   return {
-    props: { post: data },
+    props: { post: data, postBody: await serializeMarkdown(data.body) },
   };
 };

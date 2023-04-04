@@ -12,7 +12,7 @@ export const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_BASE_URL,
 });
 
-export const protedtedApi = axios.create({
+export const protectedApi = axios.create({
   baseURL: process.env.NEXT_PUBLIC_BASE_URL,
   headers: {
     Authorization: `Bearer ${token}`,
@@ -35,8 +35,8 @@ export const userRegister = async (username, email, password, image = null) => {
   return await api.post("/user/register", postData);
 };
 
-export const getAllBlogs = async () => {
-  return await api.get("/blogs");
+export const getAllBlogs = async (page) => {
+  return await api.get(`/blogs?page=${page}`);
 };
 
 export const postBlog = async (title, body, image = null) => {
@@ -47,9 +47,13 @@ export const postBlog = async (title, body, image = null) => {
   if (image) {
     postData.image = image;
   }
-  return await protedtedApi.post("/blogs", postData);
+  return await protectedApi.post("/blogs", postData);
 };
 
 export const getSingleBlog = async (id) => {
   return await api.get(`/blogs/${id}`);
+};
+
+export const editABlog = async (id, title, body) => {
+  return await protectedApi.put(`/blogs/${id}`, { title, body });
 };
