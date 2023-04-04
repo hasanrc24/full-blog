@@ -55,3 +55,7 @@ export const editABlog = async (id, title, body) => {
 export const deleteBlog = async (id) => {
   return await protectedApi.delete(`/blogs/${id}`);
 };
+
+export const postComment = async (body, blogId) => {
+  return await protectedApi.post("/comments", { body, blogId });
+};

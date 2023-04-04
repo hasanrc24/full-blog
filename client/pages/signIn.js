@@ -193,7 +193,14 @@ const SignIn = () => {
             className={`btn loading rounded-lg text-white mt-3`}
           /> */}
             {!register && (
-              <button className="btn btn-outline rounded-lg">Demo Login</button>
+              <div className="flex justify-evenly">
+                <button className="btn btn-outline rounded-lg">
+                  Guest Login
+                </button>
+                <button className="btn btn-outline rounded-lg">
+                  Admin Login
+                </button>
+              </div>
             )}
           </form>
           {register ? (

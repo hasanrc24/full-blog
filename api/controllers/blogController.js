@@ -71,7 +71,7 @@ const getBlog = async (req, res) => {
       .populate("author", "_id name email image role")
       .populate({
         path: "comments",
-        populate: { path: "author", select: "_id name email" },
+        populate: { path: "author", select: "_id name email image" },
       });
     if (!blog) {
       res.status(404).json({ message: "Blog not found" });

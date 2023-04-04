@@ -1,19 +1,24 @@
+import Comment from "@/components/Comment";
 import Navbar from "@/components/Navbar";
-import { deleteBlog, getSingleBlog } from "@/config/axiosInstance";
+import { deleteBlog, getSingleBlog, postComment } from "@/config/axiosInstance";
 import { getTime, serializeMarkdown } from "@/config/utils";
 import { editBlog } from "@/redux/editBlogSlice";
 import { userSelector } from "@/redux/userSlice";
 import { MDXRemote, MDXRemoteSerializeResult } from "next-mdx-remote";
 import Head from "next/head";
+import Link from "next/link";
 import { useRouter } from "next/router";
-import React from "react";
+import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 const PostSlug = ({ post, postBody }) => {
   const dispatch = useDispatch();
   const router = useRouter();
 
-  const { title, image, author, createdAt } = post;
+  const [commentBody, setCommentBody] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const { title, image, author, createdAt, comments, _id } = post;
 
   const { user } = useSelector(userSelector);
 
@@ -28,6 +33,20 @@ const PostSlug = ({ post, postBody }) => {
       router.replace("/");
     } catch (error) {
       console.log(error);
+    }
+  };
+
+  const submitComment = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const res = await postComment(commentBody, _id);
+      console.log(res);
+      setLoading(false);
+    } catch (error) {
+      console.log(error);
+      setLoading(false);
     }
   };
   return (
@@ -106,6 +125,44 @@ const PostSlug = ({ post, postBody }) => {
         </div>
         <div>
           <MDXRemote {...postBody} />
+        </div>
+        <div className="w-1/2 border-t my-4 border-gray-500">
+          <p className="font-semibold mt-2">Comments:</p>
+          {comments.length > 0 ? (
+            comments?.map((comment) => (
+              <Comment key={comment._id} comment={comment} />
+            ))
+          ) : (
+            <div>No comments yet.</div>
+          )}
+          {Object.keys(user).length > 0 ? (
+            <form onClick={submitComment} className="my-4">
+              <div className="flex">
+                <img src={user.image} className="h-8 rounded-full" />
+                <textarea
+                  rows={3}
+                  value={commentBody}
+                  onChange={(e) => setCommentBody(e.target.value)}
+                  placeholder="Enter your comment here."
+                  className="mx-3 w-full p-3 border-b-2 border-gray-400 focus:border-gray-600 outline-none"
+                ></textarea>
+              </div>
+              <button
+                className={`btn mt-4 rounded-lg float-right mb-4 mr-3 ${
+                  loading && "btn-loading btn-disabled"
+                }`}
+              >
+                Submit
+              </button>
+            </form>
+          ) : (
+            <div className="mt-3">
+              <Link href="/signIn" className="text-blue-600">
+                Login
+              </Link>{" "}
+              to post a comment.
+            </div>
+          )}
         </div>
       </div>
     </>
