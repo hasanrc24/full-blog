@@ -7,25 +7,38 @@ import Cookies from "js-cookie";
 import { useRouter } from "next/router";
 import { useDispatch } from "react-redux";
 import { addUserInfo } from "@/redux/userSlice";
-import { getAllBlogs } from "@/config/axiosInstance";
+import { getAllBlogs, searchBlog } from "@/config/axiosInstance";
 import { addBlogs } from "@/redux/blogSlice";
 import { wrapper } from "@/redux/store";
 import BlogCard from "@/components/BlogCard";
+import debounce from "lodash.debounce";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export default function Home({ blogs }) {
-  // const [user, setUser] = useState();
+  const [loading, setLoading] = useState(false);
+  const [searchValue, setSearchValue] = useState("");
+  const [searchResult, setSearchResult] = useState([]);
+
   const dispatch = useDispatch();
   const router = useRouter();
 
   const { totalPages, currentPage } = blogs;
 
+  const handleSearch = debounce(async (e) => {
+    // router.push(`/?search=${e.target.value}`);
+    setLoading(true);
+    try {
+      const { data } = await searchBlog(e.target.value);
+      setSearchResult(data);
+      setLoading(false);
+    } catch (error) {
+      console.log(error);
+      setLoading(false);
+    }
+  }, 400);
+
   useEffect(() => {
-    // const localUserInfo = JSON.parse(localStorage.getItem("blogUser"));
-    // if (localUserInfo) {
-    //   dispatch(addUserInfo(localUserInfo));
-    //   setUser(localUserInfo);
     dispatch(addBlogs(blogs));
     // }
   }, []);
@@ -39,7 +52,13 @@ export default function Home({ blogs }) {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className="mb-8">
-        <Navbar />
+        <Navbar
+          searchValue={searchValue}
+          setSearchValue={setSearchValue}
+          handleSearch={debounce(handleSearch, 300)}
+          searchResult={searchResult}
+          loading={loading}
+        />
         <div className="flex flex-col md:flex-row gap-8 justify-center my-6 pb-6 border-b">
           {blogs?.featured?.map((blog) => {
             return <HeroCard key={blog._id} blog={blog} />;
@@ -75,6 +94,8 @@ export const getServerSideProps = async ({ req, query }) => {
   const page = Number(query.page) || 1;
 
   const { data } = await getAllBlogs(page);
+
+  // const { data: searchedBlog } = await searchBlog(query.search);
   return {
     props: { blogs: data },
   };

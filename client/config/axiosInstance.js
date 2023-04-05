@@ -59,3 +59,7 @@ export const deleteBlog = async (id) => {
 export const postComment = async (body, blogId) => {
   return await protectedApi.post("/comments", { body, blogId });
 };
+
+export const searchBlog = async (value) => {
+  return await api.get(`/blogs/search?search=${value}`);
+};

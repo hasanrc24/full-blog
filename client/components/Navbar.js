@@ -7,7 +7,13 @@ import React, { useEffect, useState } from "react";
 import { BsSearch } from "react-icons/bs";
 import { useDispatch } from "react-redux";
 
-const Navbar = () => {
+const Navbar = ({
+  searchValue,
+  handleSearch,
+  searchResult,
+  setSearchValue,
+  loading,
+}) => {
   const dispatch = useDispatch();
   const router = useRouter();
   const [user, setUser] = useState({});
@@ -40,9 +46,34 @@ const Navbar = () => {
         <input
           type="text"
           id="search"
+          value={searchValue}
+          onChange={(e) => {
+            handleSearch(e);
+            setSearchValue(e.target.value);
+          }}
           className=" outline-none w-full pr-3"
           placeholder="Search..."
         />
+        {searchValue?.length > 0 && (
+          <div className="absolute top-16 overflow-scroll w-max max-h-32 shadow-lg bg-white rounded-md px-4 py-4 z-50">
+            {searchResult?.length > 0 ? (
+              searchResult?.map((blog) => {
+                return (
+                  <p
+                    key={blog._id}
+                    className="py-1 px-2 rounded-lg hover:bg-slate-400"
+                  >
+                    <Link href={`/post/${blog._id}`}>{blog.title}</Link>
+                  </p>
+                );
+              })
+            ) : loading ? (
+              <p>Loading...</p>
+            ) : (
+              <p>Did not find any match.</p>
+            )}
+          </div>
+        )}
       </div>
       <div className="flex justify-end md:w-1/3 items-center gap-6 font-semibold">
         <Link href="/about" className="">
