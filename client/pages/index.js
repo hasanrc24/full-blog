@@ -58,13 +58,13 @@ export default function Home({ blogs }) {
           searchResult={searchResult}
           loading={loading}
         />
-        {/* <div className="flex flex-col md:flex-row gap-8 justify-center my-6 pb-6 border-b">
-          {blogs?.featured?.map((blog) => {
+        <div className="flex flex-col md:flex-row gap-8 justify-center my-6 pb-6 border-b">
+          {blogs?.blogs?.slice(0, 2).map((blog) => {
             return <HeroCard key={blog?._id} blog={blog} />;
           })}
-        </div> */}
+        </div>
         <div className="mb-6 grid grid-cols-2 md:grid-cols-4 gap-4 grid-auto-rows-min">
-          {blogs?.blogs?.map((blog) => {
+          {blogs?.blogs?.slice(2).map((blog) => {
             return <BlogCard key={blog?._id} blog={blog} />;
           })}
         </div>

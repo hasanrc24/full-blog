@@ -18,17 +18,14 @@ const SignIn = () => {
     handleSubmit,
     watch,
     formState: { errors },
-    reset,
+    setValue,
   } = useForm();
-
-  // const [userName, setUserName] = useState("");
-  // const [email, setEmail] = useState("");
-  // const [password, setPassword] = useState("");
 
   const userName = watch("name");
   const email = watch("user_email");
   const password = watch("password");
-  const [picture, setPicture] = useState(null);
+  const [showError, setShowError] = useState(false);
+  const [error, setError] = useState("");
 
   const [file, setFile] = useState(null);
   const [imageUrl, setImageUrl] = useState(null);
@@ -79,18 +76,24 @@ const SignIn = () => {
         }
 
         try {
+          // Register a user
           const { data } = await userRegister(userName, email, password, pic);
           localStorage.setItem("blogUser", JSON.stringify(data));
           setLoading(false);
           Cookies.set("token", data.token);
           dispatch(addUserInfo(data));
+          router.push("/");
         } catch (error) {
+          setLoading(false);
           console.log(error);
+          setError(error.response.data);
+          setShowError(true);
+          setTimeout(() => {
+            setShowError(false);
+          }, 3000);
         }
-        router.push("/");
       } catch (error) {
         console.log(error);
-        setLoading(false);
       }
     } else {
       // To login a user
@@ -102,10 +105,24 @@ const SignIn = () => {
         router.push("/");
         setLoading(false);
       } catch (error) {
-        console.log(error);
+        setError(error.response.data);
+        setShowError(true);
+        setTimeout(() => {
+          setShowError(false);
+        }, 3000);
         setLoading(false);
       }
     }
+  };
+
+  const guestLogin = () => {
+    setValue("user_email", "demo@gmail.com");
+    setValue("password", "demo1234");
+  };
+
+  const adminLogin = () => {
+    setValue("user_email", "hasan@gmail.com");
+    setValue("password", "hasan1234");
   };
 
   return (
@@ -215,6 +232,7 @@ const SignIn = () => {
             >
               {usRegister ? "Sign up" : "Login"}
             </button>
+            {showError && error}
             {/* <input
             type="submit"
             value={userRegister ? "Sign up" : "Login"}
@@ -222,10 +240,16 @@ const SignIn = () => {
           /> */}
             {!usRegister && (
               <div className="flex justify-evenly">
-                <button className="btn btn-outline rounded-lg">
+                <button
+                  onClick={guestLogin}
+                  className="btn btn-outline rounded-lg"
+                >
                   Guest Login
                 </button>
-                <button className="btn btn-outline rounded-lg">
+                <button
+                  onClick={adminLogin}
+                  className="btn btn-outline rounded-lg"
+                >
                   Admin Login
                 </button>
               </div>

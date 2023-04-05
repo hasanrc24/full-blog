@@ -2,10 +2,12 @@ import Comment from "@/components/Comment";
 import Navbar from "@/components/Navbar";
 import { deleteBlog, getSingleBlog, postComment } from "@/config/axiosInstance";
 import { getTime, serializeMarkdown } from "@/config/utils";
+import { addComment, addSingleBlog, blogSelector } from "@/redux/blogSlice";
 import { editBlog } from "@/redux/editBlogSlice";
 import { userSelector } from "@/redux/userSlice";
 import { MDXRemote, MDXRemoteSerializeResult } from "next-mdx-remote";
 import Head from "next/head";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import React, { useState } from "react";
@@ -16,7 +18,6 @@ const PostSlug = ({ post, postBody }) => {
   const dispatch = useDispatch();
   const router = useRouter();
 
-  // const [commentBody, setCommentBody] = useState("");
   const [loading, setLoading] = useState(false);
 
   const {
@@ -31,6 +32,7 @@ const PostSlug = ({ post, postBody }) => {
   const { title, image, author, createdAt, comments, _id } = post;
 
   const { user } = useSelector(userSelector);
+  const { singleBlog } = useSelector(blogSelector);
 
   const handleEditBlog = () => {
     dispatch(editBlog(post));
@@ -50,8 +52,8 @@ const PostSlug = ({ post, postBody }) => {
     setLoading(true);
 
     try {
-      const res = await postComment(commentBody, _id);
-      console.log(res);
+      const { data } = await postComment(commentBody, _id, user._id);
+      dispatch(addComment(data));
       reset();
       setLoading(false);
     } catch (error) {
@@ -138,10 +140,16 @@ const PostSlug = ({ post, postBody }) => {
         </div>
         <div className="w-1/2 border-t my-4 border-gray-500">
           <p className="font-semibold mt-2">Comments:</p>
-          {comments.length > 0 ? (
-            comments?.map((comment) => (
-              <Comment key={comment._id} comment={comment} />
-            ))
+          {comments?.length ? (
+            singleBlog?.comments ? (
+              singleBlog?.comments?.map((comment) => (
+                <Comment key={comment._id} comment={comment} />
+              ))
+            ) : (
+              comments?.map((comment) => (
+                <Comment key={comment._id} comment={comment} />
+              ))
+            )
           ) : (
             <div>No comments yet.</div>
           )}

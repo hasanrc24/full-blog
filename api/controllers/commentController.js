@@ -5,7 +5,7 @@ const addComment = async (req, res) => {
   try {
     let comment = new Comment({
       body: req.body.body,
-      author: req.user._id,
+      author: req.body.userId,
       blog: req.body.blogId,
     });
     comment.populate("blog", "_id title body author");

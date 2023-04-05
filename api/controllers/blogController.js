@@ -3,7 +3,7 @@ const Blog = require("../models/blogModel");
 const allBlogs = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
-    const perPage = 4;
+    const perPage = 6;
     const skip = (page - 1) * perPage;
 
     let blogs = await Blog.find()
@@ -19,7 +19,6 @@ const allBlogs = async (req, res) => {
 
     res.json({
       blogs,
-      featured: [blogs[0], blogs[1]],
       totalPages,
       currentPage: page,
       perPage,
@@ -34,7 +33,7 @@ const newBlog = async (req, res) => {
   let blog = await Blog.create({
     title: req.body.title,
     body: req.body.body,
-    author: req.user._id,
+    author: req.body.userId,
     image: req.body.image ? req.body.image : null,
   });
   blog = await blog.populate("author", "_id name email image");

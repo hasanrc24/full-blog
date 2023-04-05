@@ -9,9 +9,11 @@ import { useDispatch, useSelector } from "react-redux";
 import { editBlog, editBlogSelector } from "@/redux/editBlogSlice";
 import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
+import { userSelector } from "@/redux/userSlice";
 
 const CreatePost = () => {
   const { blog } = useSelector(editBlogSelector);
+  const { user } = useSelector(userSelector);
 
   const dispatch = useDispatch();
   const router = useRouter();
@@ -84,7 +86,6 @@ const CreatePost = () => {
           formData.append("upload_preset", "advanced-blog");
           formData.append("cloud_name", "dnqvwwxzv");
           try {
-            console.log("pic uploading");
             const res = await fetch(
               "https://api.cloudinary.com/v1_1/dnqvwwxzv/image/upload",
               {
@@ -94,7 +95,6 @@ const CreatePost = () => {
             );
             const picData = await res.json();
             image = picData?.url?.toString();
-            // setPicture(picData?.url?.toString());
           } catch (error) {
             console.log(error);
           }
@@ -102,11 +102,10 @@ const CreatePost = () => {
 
         // Post a new blog
         try {
-          const { data } = await postBlog(newTitle, body, image);
+          const { data } = await postBlog(newTitle, body, user._id, image);
           setLoading(false);
           reset();
           setEditorState(() => EditorState.createEmpty());
-          console.log(data);
           router.push("/");
         } catch (error) {
           setLoading(false);

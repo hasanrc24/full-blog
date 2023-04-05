@@ -1,9 +1,13 @@
+import { addSingleBlog } from "@/redux/blogSlice";
 import Link from "next/link";
 import React from "react";
+import { useDispatch } from "react-redux";
 
 const HeroCard = ({ blog }) => {
+  const dispatch = useDispatch();
   return (
     <Link
+      onClick={() => dispatch(addSingleBlog(blog))}
       href={`/post/${blog._id}`}
       className="card overflow-hidden w-96 shadow-xl"
     >

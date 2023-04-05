@@ -33,10 +33,11 @@ export const getAllBlogs = async (page) => {
   return await api.get(`/blogs?page=${page}`);
 };
 
-export const postBlog = async (title, body, image = null) => {
+export const postBlog = async (title, body, userId, image = null) => {
   const postData = {
     title,
     body,
+    userId,
   };
   if (image) {
     postData.image = image;
@@ -56,8 +57,8 @@ export const deleteBlog = async (id) => {
   return await protectedApi.delete(`/blogs/${id}`);
 };
 
-export const postComment = async (body, blogId) => {
-  return await protectedApi.post("/comments", { body, blogId });
+export const postComment = async (body, blogId, userId) => {
+  return await protectedApi.post("/comments", { body, blogId, userId });
 };
 
 export const searchBlog = async (value) => {

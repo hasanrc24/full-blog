@@ -1,11 +1,14 @@
+import { addSingleBlog } from "@/redux/blogSlice";
 import Link from "next/link";
 import React, { useState } from "react";
 import { FaRegComment } from "react-icons/fa";
+import { useDispatch } from "react-redux";
 
 const BlogCard = ({ blog }) => {
-  const [blogId, setBlogId] = useState("");
+  const dispatch = useDispatch();
   return (
     <Link
+      onClick={() => dispatch(addSingleBlog(blog))}
       href={`/post/${blog._id}`}
       className="card h-max overflow-hidden bg-base-100 shadow-xl rounded-lg"
     >
@@ -17,7 +20,7 @@ const BlogCard = ({ blog }) => {
       <div className="card-body p-3">
         <h2 className="font-semibold">{blog.title}</h2>
         <p className="">
-          {blog.body.slice(0, 72)}
+          {blog.body.slice(0, 65)}
           {"..."}
         </p>
         <span className="flex text-xs items-center gap-1">
