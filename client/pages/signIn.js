@@ -7,14 +7,27 @@ import React, { useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { IoMdCloseCircle } from "react-icons/io";
 import Head from "next/head";
+import { useForm } from "react-hook-form";
 
 const SignIn = () => {
-  const [register, setRegister] = useState(false);
+  const [usRegister, setUsRegister] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const [userName, setUserName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors },
+    reset,
+  } = useForm();
+
+  // const [userName, setUserName] = useState("");
+  // const [email, setEmail] = useState("");
+  // const [password, setPassword] = useState("");
+
+  const userName = watch("name");
+  const email = watch("user_email");
+  const password = watch("password");
   const [picture, setPicture] = useState(null);
 
   const [file, setFile] = useState(null);
@@ -40,17 +53,18 @@ const SignIn = () => {
     };
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleFormSubmit = async () => {
     setLoading(true);
 
-    if (register) {
+    if (usRegister) {
+      // To register a user
       const formData = new FormData();
       formData.append("file", file);
       formData.append("upload_preset", "advanced-blog");
       formData.append("cloud_name", "dnqvwwxzv");
       try {
         let pic;
+        // Handle if user uploads image
         if (file) {
           const res = await fetch(
             "https://api.cloudinary.com/v1_1/dnqvwwxzv/image/upload",
@@ -66,7 +80,6 @@ const SignIn = () => {
 
         try {
           const { data } = await userRegister(userName, email, password, pic);
-          console.log(data);
           localStorage.setItem("blogUser", JSON.stringify(data));
           setLoading(false);
           Cookies.set("token", data.token);
@@ -75,25 +88,18 @@ const SignIn = () => {
           console.log(error);
         }
         router.push("/");
-        setUserName("");
-        setEmail("");
-        setPassword("");
       } catch (error) {
         console.log(error);
         setLoading(false);
       }
     } else {
+      // To login a user
       try {
         const { data } = await userLogin(email, password);
         localStorage.setItem("blogUser", JSON.stringify(data));
         Cookies.set("token", data.token);
-        // Cookies.set("userId", data._id);
-        // Cookies.set("userEmail", data.email);
-        // Cookies.set("userImage", data.image);
         dispatch(addUserInfo(data));
         router.push("/");
-        setEmail("");
-        setPassword("");
         setLoading(false);
       } catch (error) {
         console.log(error);
@@ -101,6 +107,7 @@ const SignIn = () => {
       }
     }
   };
+
   return (
     <>
       <Head>
@@ -114,37 +121,58 @@ const SignIn = () => {
           <p className="text-2xl text-center mb-4 font-semibold">
             Advanced Blog
           </p>
-          <form onSubmit={handleSubmit} className="flex flex-col gap-2 my-4">
-            {register && (
+          <form
+            onSubmit={handleSubmit(handleFormSubmit)}
+            className="flex flex-col gap-2 my-4"
+          >
+            {usRegister && (
               <input
                 type="text"
                 id="name"
                 placeholder="Name"
-                value={userName}
-                onChange={(e) => setUserName(e.target.value)}
+                // value={userName}
+                // onChange={(e) => setUserName(e.target.value)}
                 className="p-3 border-b-2 border-brand/50 outline-none focus:border-brand/80"
-                required
+                {...register("name", { required: true })}
               />
+            )}
+            {errors.name && (
+              <span className="text-xs text-red-600">Name is required</span>
             )}
             <input
               type="email"
               id="email"
               placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              // value={email}
+              // onChange={(e) => setEmail(e.target.value)}
               className="p-3 border-b-2 border-brand/50 outline-none focus:border-brand/80"
-              required
+              {...register("user_email", {
+                required: true,
+                pattern: /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/i,
+              })}
             />
+            {errors.user_email?.type === "required" && (
+              <p className="text-red-600 text-xs"> Please enter your Email</p>
+            )}
+            {errors.user_email?.type === "pattern" && (
+              <p className="text-red-600 text-xs"> Please enter valid Email</p>
+            )}
             <input
               type="password"
               id="password"
               placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              // value={password}
+              // onChange={(e) => setPassword(e.target.value)}
               className="p-3 border-b-2 border-brand/50 outline-none focus:border-brand/80"
-              required
+              {...register("password", { required: true })}
             />
-            {register &&
+            {errors.password && (
+              <p className="text-red-600 text-xs">
+                {" "}
+                Please enter your Password
+              </p>
+            )}
+            {usRegister &&
               (imageUrl ? (
                 <div className="flex mt-2">
                   <img
@@ -185,14 +213,14 @@ const SignIn = () => {
                 loading && "loading btn-disabled"
               } rounded-lg text-white mt-3`}
             >
-              {register ? "Sign up" : "Login"}
+              {usRegister ? "Sign up" : "Login"}
             </button>
             {/* <input
             type="submit"
-            value={register ? "Sign up" : "Login"}
+            value={userRegister ? "Sign up" : "Login"}
             className={`btn loading rounded-lg text-white mt-3`}
           /> */}
-            {!register && (
+            {!usRegister && (
               <div className="flex justify-evenly">
                 <button className="btn btn-outline rounded-lg">
                   Guest Login
@@ -203,13 +231,13 @@ const SignIn = () => {
               </div>
             )}
           </form>
-          {register ? (
-            <p onClick={() => setRegister(false)} className="cursor-pointer">
+          {usRegister ? (
+            <p onClick={() => setUsRegister(false)} className="cursor-pointer">
               Already have an account?{" "}
               <span className="text-blue-500">Sign In</span>
             </p>
           ) : (
-            <p onClick={() => setRegister(true)} className="cursor-pointer">
+            <p onClick={() => setUsRegister(true)} className="cursor-pointer">
               Don't have an account?{" "}
               <span className="text-blue-500">Sign Up</span>
             </p>

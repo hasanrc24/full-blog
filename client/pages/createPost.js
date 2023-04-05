@@ -7,7 +7,8 @@ import { editABlog, postBlog } from "@/config/axiosInstance";
 import Head from "next/head";
 import { useDispatch, useSelector } from "react-redux";
 import { editBlog, editBlogSelector } from "@/redux/editBlogSlice";
-import { Router, useRouter } from "next/router";
+import { useRouter } from "next/router";
+import { useForm } from "react-hook-form";
 
 const CreatePost = () => {
   const { blog } = useSelector(editBlogSelector);
@@ -16,8 +17,19 @@ const CreatePost = () => {
   const router = useRouter();
 
   const [loading, setLoading] = useState(false);
-  const [title, setTitle] = useState(blog?.title ? blog.title : "");
+  const [prevTitle, setPrevTitle] = useState(blog?.title ? blog.title : "");
   const [file, setFile] = useState(null);
+  const [showValidate, setShowValidate] = useState(false);
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors },
+    reset,
+  } = useForm();
+
+  const newTitle = watch("title");
 
   const RichEditor = dynamic(() => import("../components/RichEditor"), {
     ssr: false,
@@ -28,6 +40,7 @@ const CreatePost = () => {
   );
 
   useEffect(() => {
+    // Loads previous data when being edited.
     if (blog?.body) {
       const previousEditorState = EditorState.createWithContent(
         ContentState.createFromText(blog.body)
@@ -35,11 +48,11 @@ const CreatePost = () => {
       setEditorState(previousEditorState);
     }
 
+    //Dismiss previous data when page is unmounted
     const handleRouteChange = () => {
       dispatch(editBlog({}));
     };
     router.events.on("routeChangeComplete", handleRouteChange);
-
     return () => {
       router.events.off("routeChangeComplete", handleRouteChange);
     };
@@ -47,52 +60,70 @@ const CreatePost = () => {
 
   const body = draftToMarkdown(convertToRaw(editorState.getCurrentContent()));
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
+  //Check if the content body has anything
+  const contentState = editorState.getCurrentContent();
+  const contentIsEmpty = !contentState.hasText();
 
-    if (Object.keys(blog).length === 0) {
-      let image;
-      if (file) {
-        const formData = new FormData();
-        formData.append("file", file);
-        formData.append("upload_preset", "advanced-blog");
-        formData.append("cloud_name", "dnqvwwxzv");
+  const handlePost = async () => {
+    // Checing if the content field is empty
+    if (contentIsEmpty) {
+      setShowValidate(true);
+      return;
+    } else {
+      setLoading(true);
+
+      // Check if the blog has anything in it,
+      // If it doesn't have anything that means new blog is created.
+      if (Object.keys(blog).length === 0) {
+        let image;
+
+        // Check if the blog has Image. If it has first it will upload the image to cloudinary.
+        if (file) {
+          const formData = new FormData();
+          formData.append("file", file);
+          formData.append("upload_preset", "advanced-blog");
+          formData.append("cloud_name", "dnqvwwxzv");
+          try {
+            console.log("pic uploading");
+            const res = await fetch(
+              "https://api.cloudinary.com/v1_1/dnqvwwxzv/image/upload",
+              {
+                method: "POST",
+                body: formData,
+              }
+            );
+            const picData = await res.json();
+            image = picData?.url?.toString();
+            // setPicture(picData?.url?.toString());
+          } catch (error) {
+            console.log(error);
+          }
+        }
+
+        // Post a new blog
         try {
-          console.log("pic uploading");
-          const res = await fetch(
-            "https://api.cloudinary.com/v1_1/dnqvwwxzv/image/upload",
-            {
-              method: "POST",
-              body: formData,
-            }
-          );
-          const picData = await res.json();
-          image = picData?.url?.toString();
-          // setPicture(picData?.url?.toString());
+          const { data } = await postBlog(newTitle, body, image);
+          setLoading(false);
+          reset();
+          setEditorState(() => EditorState.createEmpty());
+          console.log(data);
+          router.push("/");
         } catch (error) {
+          setLoading(false);
           console.log(error);
         }
-      }
-      try {
-        const { data } = await postBlog(title, body, image);
-        setLoading(false);
-        setTitle("");
-        setEditorState(() => EditorState.createEmpty());
-        console.log(data);
-      } catch (error) {
-        setLoading(false);
-        console.log(error);
-      }
-    } else {
-      try {
-        const { data } = await editABlog(blog._id, title, body);
-        dispatch(editBlog({}));
-        router.replace("/");
-        setLoading(false);
-      } catch (error) {
-        console.log(error);
-        setLoading(false);
+      } else {
+        // Submit an edited blog
+        try {
+          const { data } = await editABlog(blog?._id, newTitle, body);
+          dispatch(editBlog({}));
+          router.replace("/");
+          setLoading(false);
+          reset();
+        } catch (error) {
+          console.log(error);
+          setLoading(false);
+        }
       }
     }
   };
@@ -109,18 +140,27 @@ const CreatePost = () => {
         <p className="font-semibold text-4xl mt-4 mb-8">
           {blog?.body ? "Edit Blog" : "Post a Blog"}
         </p>
-        <form onSubmit={handleSubmit} className="h-full">
+        <form onSubmit={handleSubmit(handlePost)} className="h-full">
+          <br />
           <input
             type="text"
             placeholder="Blog Title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            // value={title}
+            // onChange={(e) => setTitle(e.target.value)}
+            defaultValue={prevTitle}
             className="px-4 py-2 mb-8 w-2/4 rounded-md focus:rounded-none border-b-2 outline-none focus:border-slate-700"
+            {...register("title", { required: true })}
           />
+          {errors.title && (
+            <span className="text-xs text-red-600">Title is required</span>
+          )}
           <RichEditor
             editorState={editorState}
             setEditorState={setEditorState}
           />
+          {contentIsEmpty && showValidate && (
+            <p className="text-xs text-red-600">Content body is required</p>
+          )}
           {Object.keys(blog).length === 0 && (
             <input
               type="file"

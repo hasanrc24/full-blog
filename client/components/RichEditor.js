@@ -12,10 +12,6 @@ const RichEditor = ({ editorState, setEditorState }) => {
         editorState={editorState}
         onEditorStateChange={handleEditorChange}
       />
-      {/* <textarea
-        disabled
-        value={draftToHtml(convertToRaw(editorState.getCurrentContent()))}
-      /> */}
     </>
   );
 };

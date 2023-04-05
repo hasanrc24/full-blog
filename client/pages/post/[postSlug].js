@@ -9,14 +9,24 @@ import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import React, { useState } from "react";
+import { useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 
 const PostSlug = ({ post, postBody }) => {
   const dispatch = useDispatch();
   const router = useRouter();
 
-  const [commentBody, setCommentBody] = useState("");
+  // const [commentBody, setCommentBody] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors },
+    reset,
+  } = useForm();
+  const commentBody = watch("comment");
 
   const { title, image, author, createdAt, comments, _id } = post;
 
@@ -36,13 +46,13 @@ const PostSlug = ({ post, postBody }) => {
     }
   };
 
-  const submitComment = async (e) => {
-    e.preventDefault();
+  const submitComment = async () => {
     setLoading(true);
 
     try {
       const res = await postComment(commentBody, _id);
       console.log(res);
+      reset();
       setLoading(false);
     } catch (error) {
       console.log(error);
@@ -136,18 +146,23 @@ const PostSlug = ({ post, postBody }) => {
             <div>No comments yet.</div>
           )}
           {Object.keys(user).length > 0 ? (
-            <form onClick={submitComment} className="my-4">
+            <form onClick={handleSubmit(submitComment)} className="my-4">
               <div className="flex">
                 <img src={user.image} className="h-8 rounded-full" />
                 <textarea
                   rows={3}
-                  value={commentBody}
-                  onChange={(e) => setCommentBody(e.target.value)}
+                  // value={commentBody}
+                  // onChange={(e) => setCommentBody(e.target.value)}
                   placeholder="Enter your comment here."
                   className="mx-3 w-full p-3 border-b-2 border-gray-400 focus:border-gray-600 outline-none"
+                  {...register("comment", { required: true })}
                 ></textarea>
+                {errors.comment && (
+                  <span className="text-xs">Please write something</span>
+                )}
               </div>
               <button
+                type="submit"
                 className={`btn mt-4 rounded-lg float-right mb-4 mr-3 ${
                   loading && "btn-loading btn-disabled"
                 }`}

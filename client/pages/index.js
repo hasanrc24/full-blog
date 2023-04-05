@@ -40,7 +40,6 @@ export default function Home({ blogs }) {
 
   useEffect(() => {
     dispatch(addBlogs(blogs));
-    // }
   }, []);
 
   return (
@@ -59,14 +58,14 @@ export default function Home({ blogs }) {
           searchResult={searchResult}
           loading={loading}
         />
-        <div className="flex flex-col md:flex-row gap-8 justify-center my-6 pb-6 border-b">
+        {/* <div className="flex flex-col md:flex-row gap-8 justify-center my-6 pb-6 border-b">
           {blogs?.featured?.map((blog) => {
-            return <HeroCard key={blog._id} blog={blog} />;
+            return <HeroCard key={blog?._id} blog={blog} />;
           })}
-        </div>
+        </div> */}
         <div className="mb-6 grid grid-cols-2 md:grid-cols-4 gap-4 grid-auto-rows-min">
-          {blogs?.blogs.map((blog) => {
-            return <BlogCard key={blog._id} blog={blog} />;
+          {blogs?.blogs?.map((blog) => {
+            return <BlogCard key={blog?._id} blog={blog} />;
           })}
         </div>
         <div className="btn-group flex justify-center">
@@ -90,7 +89,7 @@ export default function Home({ blogs }) {
   );
 }
 
-export const getServerSideProps = async ({ req, query }) => {
+export const getServerSideProps = async ({ query }) => {
   const page = Number(query.page) || 1;
 
   const { data } = await getAllBlogs(page);
