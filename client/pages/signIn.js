@@ -73,7 +73,6 @@ const SignIn = () => {
           );
           const picData = await res.json();
           pic = picData?.url?.toString();
-          setPicture(picData?.url?.toString());
         }
 
         try {
