@@ -75,6 +75,7 @@ const Navbar = () => {
                 return (
                   <p
                     key={blog._id}
+                    onClick={() => (inputRef.current.value = "")}
                     className="py-1 px-2 rounded-lg hover:bg-slate-400"
                   >
                     <Link href={`/post/${blog._id}`}>{blog.title}</Link>
