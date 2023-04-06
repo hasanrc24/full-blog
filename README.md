@@ -18,6 +18,7 @@ This is a MERN stack project. The frontend is created with Next.js with server-s
 * A rich text editor (draft-js) is implemented in the create post page.
 * #### When posting a blog in Rich text editor, Please do not copy and paste the content from other website as the copied content will contain html tags and the website is functioned to serialize only markdown content.
 * Form validation is implemented with react-hook-forms.
+* Anyone can search and read their desired blog content.
 
 **The live website link**: [https://full-blog-client.vercel.app/]()
 
