@@ -1,4 +1,5 @@
 import { addSingleBlog } from "@/redux/blogSlice";
+import Image from "next/image";
 import Link from "next/link";
 import React, { useState } from "react";
 import { FaRegComment } from "react-icons/fa";
@@ -14,7 +15,13 @@ const BlogCard = ({ blog }) => {
     >
       {blog?.image && (
         <figure>
-          <img src={blog.image} alt="blog-img" />
+          <Image
+            width={300}
+            height={250}
+            className="w-full"
+            src={blog.image}
+            alt="blog-img"
+          />
         </figure>
       )}
       <div className="card-body p-3">

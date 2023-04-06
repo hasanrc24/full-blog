@@ -2,41 +2,21 @@ import Head from "next/head";
 import { Inter } from "next/font/google";
 import Navbar from "@/components/Navbar";
 import HeroCard from "@/components/HeroCard";
-import { useEffect, useState } from "react";
-import Cookies from "js-cookie";
+import { useEffect } from "react";
 import { useRouter } from "next/router";
 import { useDispatch } from "react-redux";
-import { addUserInfo } from "@/redux/userSlice";
-import { getAllBlogs, searchBlog } from "@/config/axiosInstance";
+import { getAllBlogs } from "@/config/axiosInstance";
 import { addBlogs } from "@/redux/blogSlice";
 import { wrapper } from "@/redux/store";
 import BlogCard from "@/components/BlogCard";
-import debounce from "lodash.debounce";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export default function Home({ blogs }) {
-  const [loading, setLoading] = useState(false);
-  const [searchValue, setSearchValue] = useState("");
-  const [searchResult, setSearchResult] = useState([]);
-
   const dispatch = useDispatch();
   const router = useRouter();
 
   const { totalPages, currentPage } = blogs;
-
-  const handleSearch = debounce(async (e) => {
-    // router.push(`/?search=${e.target.value}`);
-    setLoading(true);
-    try {
-      const { data } = await searchBlog(e.target.value);
-      setSearchResult(data);
-      setLoading(false);
-    } catch (error) {
-      console.log(error);
-      setLoading(false);
-    }
-  }, 400);
 
   useEffect(() => {
     dispatch(addBlogs(blogs));
@@ -51,13 +31,7 @@ export default function Home({ blogs }) {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className="mb-8">
-        <Navbar
-          searchValue={searchValue}
-          setSearchValue={setSearchValue}
-          handleSearch={debounce(handleSearch, 300)}
-          searchResult={searchResult}
-          loading={loading}
-        />
+        <Navbar />
         <div className="flex flex-col md:flex-row gap-8 justify-center my-6 pb-6 border-b">
           {blogs?.blogs?.slice(0, 2).map((blog) => {
             return <HeroCard key={blog?._id} blog={blog} />;

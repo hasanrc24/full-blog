@@ -1,23 +1,23 @@
+import { searchBlog } from "@/config/axiosInstance";
 import { addUserInfo } from "@/redux/userSlice";
 import Cookies from "js-cookie";
+import debounce from "lodash.debounce";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { BsSearch } from "react-icons/bs";
 import { useDispatch } from "react-redux";
 
-const Navbar = ({
-  searchValue,
-  handleSearch,
-  searchResult,
-  setSearchValue,
-  loading,
-}) => {
+const Navbar = () => {
+  const [loading, setLoading] = useState(false);
+  const [searchResult, setSearchResult] = useState([]);
+
+  const inputRef = useRef(null);
+
   const dispatch = useDispatch();
   const router = useRouter();
   const [user, setUser] = useState({});
-  // console.log(user);
 
   useEffect(() => {
     const localUserInfo = JSON.parse(localStorage.getItem("blogUser"));
@@ -27,6 +27,21 @@ const Navbar = ({
       setUser(localUserInfo);
     }
   }, []);
+
+  const inputValue = inputRef?.current?.value;
+
+  const handleSearch = debounce(async (e) => {
+    // router.push(`/?search=${e.target.value}`);
+    setLoading(true);
+    try {
+      const { data } = await searchBlog(e.target.value);
+      setSearchResult(data);
+      setLoading(false);
+    } catch (error) {
+      console.log(error);
+      setLoading(false);
+    }
+  }, 400);
 
   const handleLogout = () => {
     localStorage.removeItem("blogUser");
@@ -46,15 +61,14 @@ const Navbar = ({
         <input
           type="text"
           id="search"
-          value={searchValue}
+          ref={inputRef}
           onChange={(e) => {
             handleSearch(e);
-            setSearchValue(e.target.value);
           }}
           className=" outline-none w-full pr-3"
           placeholder="Search..."
         />
-        {searchValue?.length > 0 && (
+        {searchResult?.length > 0 && inputValue && (
           <div className="absolute top-16 overflow-scroll w-max max-h-32 shadow-lg bg-white rounded-md px-4 py-4 z-50">
             {searchResult?.length > 0 ? (
               searchResult?.map((blog) => {
@@ -88,9 +102,10 @@ const Navbar = ({
               tabIndex={0}
               className="bg-neutral-focus text-neutral-content rounded-full cursor-pointer"
             >
-              <img
+              <Image
+                height={30}
+                width={30}
                 src={user.image}
-                style={{ width: "33px" }}
                 className="rounded-full "
                 alt="avatar"
               />

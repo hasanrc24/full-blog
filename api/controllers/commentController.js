@@ -8,7 +8,10 @@ const addComment = async (req, res) => {
       author: req.body.userId,
       blog: req.body.blogId,
     });
-    comment.populate("blog", "_id title body author");
+    (await comment.populate("blog", "_id title body author")).populate(
+      "author",
+      "_id name image"
+    );
     await Blog.findByIdAndUpdate(
       req.body.blogId,
       { $push: { comments: comment._id } },
@@ -22,15 +25,4 @@ const addComment = async (req, res) => {
   }
 };
 
-const getComments = async (req, res) => {
-  try {
-    const comments = await Comment.find({ blog: req.params.blogId })
-      .populate("author", "_id name email image")
-      .populate("blog", "_id title body author");
-    res.json(comments);
-  } catch (error) {
-    res.status(400).json({ message: "Failed to get comments", error: error });
-  }
-};
-
-module.exports = { addComment, getComments };
+module.exports = { addComment };

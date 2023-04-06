@@ -2,10 +2,10 @@ import Comment from "@/components/Comment";
 import Navbar from "@/components/Navbar";
 import { deleteBlog, getSingleBlog, postComment } from "@/config/axiosInstance";
 import { getTime, serializeMarkdown } from "@/config/utils";
-import { addComment, addSingleBlog, blogSelector } from "@/redux/blogSlice";
+import { addComment, blogSelector } from "@/redux/blogSlice";
 import { editBlog } from "@/redux/editBlogSlice";
 import { userSelector } from "@/redux/userSlice";
-import { MDXRemote, MDXRemoteSerializeResult } from "next-mdx-remote";
+import { MDXRemote } from "next-mdx-remote";
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
@@ -53,7 +53,7 @@ const PostSlug = ({ post, postBody }) => {
 
     try {
       const { data } = await postComment(commentBody, _id, user._id);
-      dispatch(addComment(data));
+      singleBlog?.comments && dispatch(addComment(data));
       reset();
       setLoading(false);
     } catch (error) {
@@ -71,15 +71,17 @@ const PostSlug = ({ post, postBody }) => {
       </Head>
       <Navbar />
       <div className="my-8">
-        <div className="flex gap-8 mb-6">
-          <div className="w-1/2 flex justify-center flex-col">
+        <div className="grid grid-cols-2 gap-8 mb-6">
+          <div className=" flex justify-center flex-col">
             <>
               <p className="font-semibold text-3xl">{title}</p>
               <div className="flex gap-2 my-4">
-                <img
+                <Image
+                  height={40}
+                  width={40}
                   src={author.image}
                   alt="author"
-                  className=" h-10 rounded-full"
+                  className=" rounded-full"
                 />
                 <div>
                   <p className="font-semibold">{author.name}</p>
@@ -96,9 +98,6 @@ const PostSlug = ({ post, postBody }) => {
                   >
                     Edit
                   </button>
-                  {/* <button className="btn max-w-max btn-outline rounded-md">
-                    Delete
-                  </button> */}
                   <label htmlFor="my-modal-3" className="btn btn-outline">
                     Delete
                   </label>
@@ -131,16 +130,24 @@ const PostSlug = ({ post, postBody }) => {
               </div>
             </>
           </div>
-          <div className="w-1/2">
-            {image && <img src={image} alt="post image" className="" />}
+          <div className="w-full h-full">
+            {image && (
+              <Image
+                src={image}
+                width={500}
+                height={450}
+                alt="post image"
+                className="w-full"
+              />
+            )}
           </div>
         </div>
         <div>
           <MDXRemote {...postBody} />
         </div>
-        <div className="w-1/2 border-t my-4 border-gray-500">
+        <div className="w-full md:w-1/2 border-t my-4 border-gray-500">
           <p className="font-semibold mt-2">Comments:</p>
-          {comments?.length ? (
+          {comments?.length || singleBlog?.comments ? (
             singleBlog?.comments ? (
               singleBlog?.comments?.map((comment) => (
                 <Comment key={comment._id} comment={comment} />
@@ -156,11 +163,15 @@ const PostSlug = ({ post, postBody }) => {
           {Object.keys(user).length > 0 ? (
             <form onClick={handleSubmit(submitComment)} className="my-4">
               <div className="flex">
-                <img src={user.image} className="h-8 rounded-full" />
+                <Image
+                  height={32}
+                  width={32}
+                  src={user.image}
+                  alt="user-avatar"
+                  className="h-8 rounded-full"
+                />
                 <textarea
                   rows={3}
-                  // value={commentBody}
-                  // onChange={(e) => setCommentBody(e.target.value)}
                   placeholder="Enter your comment here."
                   className="mx-3 w-full p-3 border-b-2 border-gray-400 focus:border-gray-600 outline-none"
                   {...register("comment", { required: true })}

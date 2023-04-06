@@ -8,6 +8,7 @@ import { useDispatch } from "react-redux";
 import { IoMdCloseCircle } from "react-icons/io";
 import Head from "next/head";
 import { useForm } from "react-hook-form";
+import Image from "next/image";
 
 const SignIn = () => {
   const [usRegister, setUsRegister] = useState(false);
@@ -192,9 +193,11 @@ const SignIn = () => {
             {usRegister &&
               (imageUrl ? (
                 <div className="flex mt-2">
-                  <img
+                  <Image
+                    height={50}
+                    width={50}
                     src={imageUrl}
-                    className="h-10 object-contain rounded-lg"
+                    className="object-contain rounded-lg"
                     alt="Selected file"
                   />
                   <IoMdCloseCircle
