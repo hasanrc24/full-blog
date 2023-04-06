@@ -1,6 +1,6 @@
 import axios from "axios";
-import Cookies from "js-cookie";
-const token = Cookies.get("token");
+import { getTokenFromLocalCookie } from "./verify";
+const token = getTokenFromLocalCookie();
 
 export const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_BASE_URL,

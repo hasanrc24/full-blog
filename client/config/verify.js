@@ -1,11 +1,7 @@
 import Cookies from "js-cookie";
-import jwt_decode from "jwt-decode";
 
-export const verify = (id) => {
-  const token = Cookies.get("token");
-  const decoded = jwt_decode(token);
-  console.log(decoded.id, id);
-  return decoded.id === id ? true : false;
+export const getTokenFromLocalCookie = () => {
+  return Cookies.get("token");
 };
 
 export const getTokenFromServerCookie = (req) => {
