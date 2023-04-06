@@ -147,7 +147,7 @@ const PostSlug = ({ post, postBody }) => {
         </div>
         <div className="w-full md:w-1/2 border-t my-4 border-gray-500">
           <p className="font-semibold mt-2">Comments:</p>
-          {comments?.length || singleBlog?.comments ? (
+          {comments?.length !== 0 || singleBlog?.comments.length !== 0 ? (
             singleBlog?.comments ? (
               singleBlog?.comments?.map((comment) => (
                 <Comment key={comment._id} comment={comment} />
