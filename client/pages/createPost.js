@@ -2,7 +2,7 @@ import Navbar from "@/components/Navbar";
 import dynamic from "next/dynamic";
 import React, { useEffect, useState } from "react";
 import { ContentState, EditorState, convertToRaw } from "draft-js";
-import draftToMarkdown from "draftjs-to-markdown";
+// import draftToMarkdown from "draftjs-to-markdown";
 import { editABlog, postBlog } from "@/config/axiosInstance";
 import Head from "next/head";
 import { useDispatch, useSelector } from "react-redux";
@@ -10,6 +10,7 @@ import { editBlog, editBlogSelector } from "@/redux/editBlogSlice";
 import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
 import { userSelector } from "@/redux/userSlice";
+import { getTokenFromServerCookie } from "@/config/verify";
 
 const CreatePost = () => {
   const { blog } = useSelector(editBlogSelector);
@@ -37,9 +38,23 @@ const CreatePost = () => {
     ssr: false,
   });
 
+  let draftToMarkdown;
+  let contentIsEmpty;
+  let contentState;
+  let body;
+
   const [editorState, setEditorState] = useState(() =>
     EditorState.createEmpty()
   );
+
+  if (typeof window !== "undefined") {
+    draftToMarkdown = require("draftjs-to-markdown").default;
+    body = draftToMarkdown(convertToRaw(editorState.getCurrentContent()));
+
+    //Check if the content body has anything
+    contentState = editorState.getCurrentContent();
+    contentIsEmpty = !contentState.hasText();
+  }
 
   useEffect(() => {
     // Loads previous data when being edited.
@@ -59,12 +74,6 @@ const CreatePost = () => {
       router.events.off("routeChangeComplete", handleRouteChange);
     };
   }, []);
-
-  const body = draftToMarkdown(convertToRaw(editorState.getCurrentContent()));
-
-  //Check if the content body has anything
-  const contentState = editorState.getCurrentContent();
-  const contentIsEmpty = !contentState.hasText();
 
   const handlePost = async () => {
     // Checing if the content field is empty
@@ -193,3 +202,17 @@ const CreatePost = () => {
 };
 
 export default CreatePost;
+
+export async function getServerSideProps({ req }) {
+  const token = getTokenFromServerCookie(req);
+  if (!token) {
+    return {
+      redirect: {
+        destination: "/signIn",
+      },
+    };
+  }
+  return {
+    props: {},
+  };
+}
