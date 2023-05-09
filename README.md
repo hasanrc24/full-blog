@@ -21,7 +21,3 @@ This is a MERN stack project. The frontend is created with Next.js with server-s
 * Anyone can search and read their desired blog content.
 
 **The live website link**: [https://full-blog-client.vercel.app/]()
-
-**How to run this on your local machine:** Clone this repository and open 'client' and  'api' directory and run npm install on both side.
-create .env file on both side. and the the env credentials.
-To get the env credentials click [here](https://docs.google.com/document/d/1jXGr4zWDKqrCWRYl9cj5Zud9KCcYh01Aro_s-AXYQdE/edit).
